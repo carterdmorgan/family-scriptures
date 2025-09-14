@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scripture Stories</title>
+  <style>
+    :root {
+      --primary: #4a90e2;
+      --primary-dark: #357ab7;
+      --bg: #fdfdfd;
+      --text: #222;
+      --muted: #666;
+      --surface: #ffffff;
+      --shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+      --radius: 10px;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Inter", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    header {
+      background: var(--primary);
+      color: white;
+      text-align: center;
+      padding: 1.2rem;
+      box-shadow: var(--shadow);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.6rem;
+      font-weight: 600;
+    }
+
+    nav {
+      display: flex;
+      border-bottom: 1px solid #ddd;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    nav a {
+      flex: 1;
+      padding: 0.9rem;
+      text-align: center;
+      text-decoration: none;
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--muted);
+      background: none;
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+
+    nav a.active {
+      color: var(--primary);
+      border-bottom: 2px solid var(--primary);
+      background: #f8faff;
+    }
+
+    nav a:hover {
+      background: #f5f5f5;
+    }
+
+    main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem 1rem;
+      max-width: 720px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .tab {
+      display: none;
+      opacity: 0;
+      transition: opacity 0.15s ease-in-out;
+    }
+
+    .tab.active {
+      display: block;
+      opacity: 1;
+    }
+
+    .story {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin: 1rem 0;
+    }
+
+    .reference a {
+      font-size: 1rem;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.15s ease;
+    }
+
+    .reference a:hover {
+      color: var(--primary-dark);
+      text-decoration: underline;
+    }
+
+    .btn {
+      margin-top: 1.2rem;
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0.65rem 1.25rem;
+      font-size: 1rem;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: background 0.15s ease;
+      box-shadow: var(--shadow);
+    }
+
+    .btn:hover {
+      background: var(--primary-dark);
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    ul li {
+      margin: 0.9rem 0;
+      padding: 0.9rem;
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      text-align: left;
+    }
+
+    ul li strong {
+      display: block;
+      margin-bottom: 0.25rem;
+      font-size: 1.05rem;
+    }
+
+    #allStories h3 {
+      margin-top: 2rem;
+      margin-bottom: 0.5rem;
+      color: var(--primary);
+      font-size: 1.1rem;
+      font-weight: 600;
+      border-left: 4px solid var(--primary);
+      padding-left: 0.5rem;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>Scripture Stories</h1>
+  </header>
+
+  <nav>
+    <a href="?tab=daily" class="active" data-tab="daily">Daily</a>
+    <a href="?tab=random" data-tab="random">Random</a>
+    <a href="?tab=all" data-tab="all">All Stories</a>
+  </nav>
+
+  <main>
+    <!-- Story of the Day -->
+    <div id="daily" class="tab active">
+      <h2>Story of the Day</h2>
+      <div class="story" id="dailyStory"></div>
+      <div class="reference" id="dailyRef"></div>
+    </div>
+
+    <!-- Random Story -->
+    <div id="random" class="tab">
+      <h2>Random Story</h2>
+      <div class="story" id="randomStory"></div>
+      <div class="reference" id="randomRef"></div>
+      <button class="btn" onclick="pickRandom()">Pick Another</button>
+    </div>
+
+    <!-- All Stories -->
+    <div id="all" class="tab">
+      <h2>All Stories</h2>
+      <ul id="allStories"></ul>
+    </div>
+  </main>
+
+  <script>
+    // ====== Stories Data ======
+    const stories = [
+      // ===== Old Testament =====
+      { title: "The Fall (Adam & Eve)", ref: "Genesis 3:1–19", volume: "ot", book: "gen", chapter: 3, verses: "1-19" },
+      { title: "Cain and Abel", ref: "Genesis 4:1–12", volume: "ot", book: "gen", chapter: 4, verses: "1-12" },
+      { title: "Noah and the Flood", ref: "Genesis 7:11–24", volume: "ot", book: "gen", chapter: 7, verses: "11-24" },
+      { title: "Tower of Babel", ref: "Genesis 11:1–9", volume: "ot", book: "gen", chapter: 11, verses: "1-9" },
+      { title: "Call of Abram", ref: "Genesis 12:1–9", volume: "ot", book: "gen", chapter: 12, verses: "1-9" },
+      { title: "Abram in Egypt", ref: "Genesis 12:10–20", volume: "ot", book: "gen", chapter: 12, verses: "10-20" },
+      { title: "Lot’s Capture and Rescue", ref: "Genesis 14:11–16", volume: "ot", book: "gen", chapter: 14, verses: "11-16" },
+      { title: "God’s Covenant with Abram", ref: "Genesis 15:1–12, 17–18", volume: "ot", book: "gen", chapter: 15, verses: "1-12,17-18" },
+      { title: "Hagar and Ishmael", ref: "Genesis 16:1–12", volume: "ot", book: "gen", chapter: 16, verses: "1-12" },
+      { title: "Sodom and Gomorrah", ref: "Genesis 19:12–26", volume: "ot", book: "gen", chapter: 19, verses: "12-26" },
+      { title: "Abraham Tested (Isaac on Moriah)", ref: "Genesis 22:1–14", volume: "ot", book: "gen", chapter: 22, verses: "1-14" },
+      { title: "Isaac and Rebekah", ref: "Genesis 24:10–27", volume: "ot", book: "gen", chapter: 24, verses: "10-27" },
+      { title: "Jacob and Esau (Birthright)", ref: "Genesis 25:29–34", volume: "ot", book: "gen", chapter: 25, verses: "29-34" },
+      { title: "Jacob and Esau (Blessing)", ref: "Genesis 27:18–29", volume: "ot", book: "gen", chapter: 27, verses: "18-29" },
+      { title: "Jacob’s Ladder", ref: "Genesis 28:10–17", volume: "ot", book: "gen", chapter: 28, verses: "10-17" },
+      { title: "Jacob Marries Leah and Rachel", ref: "Genesis 29:15–30", volume: "ot", book: "gen", chapter: 29, verses: "15-30" },
+      { title: "Jacob Wrestles with God", ref: "Genesis 32:22–30", volume: "ot", book: "gen", chapter: 32, verses: "22-30" },
+      { title: "Joseph’s Dreams and Betrayal", ref: "Genesis 37:5–11,18–28", volume: "ot", book: "gen", chapter: 37, verses: "5-11,18-28" },
+      { title: "Joseph and Potiphar’s Wife", ref: "Genesis 39:6–20", volume: "ot", book: "gen", chapter: 39, verses: "6-20" },
+      { title: "Joseph Interprets Pharaoh’s Dreams", ref: "Genesis 41:14–32", volume: "ot", book: "gen", chapter: 41, verses: "14-32" },
+      { title: "Joseph Reveals Himself to His Brothers", ref: "Genesis 45:1–15", volume: "ot", book: "gen", chapter: 45, verses: "1-15" },
+      { title: "Birth of Moses", ref: "Exodus 2:1–10", volume: "ot", book: "ex", chapter: 2, verses: "1-10" },
+      { title: "Burning Bush", ref: "Exodus 3:1–12", volume: "ot", book: "ex", chapter: 3, verses: "1-12" },
+      { title: "Ten Plagues (First)", ref: "Exodus 7:14–24", volume: "ot", book: "ex", chapter: 7, verses: "14-24" },
+      { title: "Ten Plagues (Final)", ref: "Exodus 12:29–32", volume: "ot", book: "ex", chapter: 12, verses: "29-32" },
+      { title: "The First Passover", ref: "Exodus 12:21–30", volume: "ot", book: "ex", chapter: 12, verses: "21-30" },
+      { title: "Crossing the Red Sea", ref: "Exodus 14:21–31", volume: "ot", book: "ex", chapter: 14, verses: "21-31" },
+      { title: "Manna and Quail", ref: "Exodus 16:11–21", volume: "ot", book: "ex", chapter: 16, verses: "11-21" },
+      { title: "Water from the Rock", ref: "Exodus 17:1–7", volume: "ot", book: "ex", chapter: 17, verses: "1-7" },
+      { title: "Ten Commandments", ref: "Exodus 20:1–17", volume: "ot", book: "ex", chapter: 20, verses: "1-17" },
+      { title: "Golden Calf", ref: "Exodus 32:1–20", volume: "ot", book: "ex", chapter: 32, verses: "1-20" },
+      { title: "Balaam’s Donkey", ref: "Numbers 22:21–35", volume: "ot", book: "num", chapter: 22, verses: "21-35" },
+      { title: "Fall of Jericho", ref: "Joshua 6:12–20", volume: "ot", book: "josh", chapter: 6, verses: "12-20" },
+      { title: "Sun Stands Still", ref: "Joshua 10:7–15", volume: "ot", book: "josh", chapter: 10, verses: "7-15" },
+      { title: "David and Goliath", ref: "1 Samuel 17:40–51", volume: "ot", book: "1-sam", chapter: 17, verses: "40-51" },
+      { title: "David Becomes King", ref: "2 Samuel 5:1–5", volume: "ot", book: "2-sam", chapter: 5, verses: "1-5" },
+      { title: "David and Bathsheba", ref: "2 Samuel 11:2–17", volume: "ot", book: "2-sam", chapter: 11, verses: "2-17" },
+      { title: "Elijah and the Prophets of Baal", ref: "1 Kings 18:25–39", volume: "ot", book: "1-kgs", chapter: 18, verses: "25-39" },
+      { title: "Esther Becomes Queen", ref: "Esther 2:15–18", volume: "ot", book: "esth", chapter: 2, verses: "15-18" },
+      { title: "Esther Saves Her People", ref: "Esther 7:1–10", volume: "ot", book: "esth", chapter: 7, verses: "1-10" },
+      { title: "Daniel and Friends in the Furnace", ref: "Daniel 3:13–28", volume: "ot", book: "dan", chapter: 3, verses: "13-28" },
+      { title: "Daniel in the Lions’ Den", ref: "Daniel 6:16–23", volume: "ot", book: "dan", chapter: 6, verses: "16-23" },
+      { title: "Jonah Flees and the Fish", ref: "Jonah 1:12–17; 2:1,10", volume: "ot", book: "jonah", chapter: 1, verses: "12-17,2:1,2:10" },
+
+      // ===== New Testament =====
+      { title: "Birth of Jesus", ref: "Luke 2:1–14", volume: "nt", book: "luke", chapter: 2, verses: "1-14" },
+      { title: "Sermon on the Mount", ref: "Matthew 5:1–12", volume: "nt", book: "matt", chapter: 5, verses: "1-12" },
+      { title: "Parable of the Sower", ref: "Matthew 13:3–9,18–23", volume: "nt", book: "matt", chapter: 13, verses: "3-9,18-23" },
+      { title: "Parable of the Weeds", ref: "Matthew 13:24–30", volume: "nt", book: "matt", chapter: 13, verses: "24-30" },
+      { title: "Parable of the Mustard Seed", ref: "Matthew 13:31–32", volume: "nt", book: "matt", chapter: 13, verses: "31-32" },
+      { title: "Parable of the Hidden Treasure and Pearl", ref: "Matthew 13:44–46", volume: "nt", book: "matt", chapter: 13, verses: "44-46" },
+      { title: "Feeding of the 5,000", ref: "Matthew 14:13–21", volume: "nt", book: "matt", chapter: 14, verses: "13-21" },
+      { title: "Jesus Walks on Water", ref: "Matthew 14:25–33", volume: "nt", book: "matt", chapter: 14, verses: "25-33" },
+      { title: "Parable of the Unmerciful Servant", ref: "Matthew 18:23–35", volume: "nt", book: "matt", chapter: 18, verses: "23-35" },
+      { title: "Parable of the Workers in the Vineyard", ref: "Matthew 20:1–16", volume: "nt", book: "matt", chapter: 20, verses: "1-16" },
+      { title: "Triumphal Entry", ref: "Matthew 21:1–11", volume: "nt", book: "matt", chapter: 21, verses: "1-11" },
+      { title: "Parable of the Tenants", ref: "Matthew 21:33–41", volume: "nt", book: "matt", chapter: 21, verses: "33-41" },
+      { title: "Parable of the Wedding Banquet", ref: "Matthew 22:1–14", volume: "nt", book: "matt", chapter: 22, verses: "1-14" },
+      { title: "Parable of the Ten Virgins", ref: "Matthew 25:1–13", volume: "nt", book: "matt", chapter: 25, verses: "1-13" },
+      { title: "Parable of the Talents", ref: "Matthew 25:14–30", volume: "nt", book: "matt", chapter: 25, verses: "14-30" },
+      { title: "The Last Supper", ref: "Matthew 26:17–30", volume: "nt", book: "matt", chapter: 26, verses: "17-30" },
+      { title: "Jesus’ Crucifixion", ref: "Luke 23:33–46", volume: "nt", book: "luke", chapter: 23, verses: "33-46" },
+      { title: "Resurrection", ref: "Matthew 28:1–10", volume: "nt", book: "matt", chapter: 28, verses: "1-10" },
+      { title: "Jesus Calms the Storm", ref: "Mark 4:35–41", volume: "nt", book: "mark", chapter: 4, verses: "35-41" },
+      { title: "Feeding of the 4,000", ref: "Mark 8:1–9", volume: "nt", book: "mark", chapter: 8, verses: "1-9" },
+      { title: "Peter Declares Jesus as Messiah", ref: "Mark 8:27–30", volume: "nt", book: "mark", chapter: 8, verses: "27-30" },
+      { title: "The Transfiguration", ref: "Mark 9:2–8", volume: "nt", book: "mark", chapter: 9, verses: "2-8" },
+      { title: "Jesus Blesses the Children", ref: "Mark 10:13–16", volume: "nt", book: "mark", chapter: 10, verses: "13-16" },
+      { title: "The Rich Young Man", ref: "Mark 10:17–22", volume: "nt", book: "mark", chapter: 10, verses: "17-22" },
+      { title: "Birth of John the Baptist Foretold", ref: "Luke 1:11–20", volume: "nt", book: "luke", chapter: 1, verses: "11-20" },
+
+      // ===== Book of Mormon =====
+      { title: "Lehi’s Vision of the Pillar of Fire", ref: "1 Nephi 1:5–15", volume: "bofm", book: "1-ne", chapter: 1, verses: "5-15" },
+      { title: "Lehi’s Family Leaves Jerusalem", ref: "1 Nephi 2:1–7", volume: "bofm", book: "1-ne", chapter: 2, verses: "1-7" },
+      { title: "Nephi Obtains the Brass Plates", ref: "1 Nephi 4:5–18", volume: "bofm", book: "1-ne", chapter: 4, verses: "5-18" },
+      { title: "Lehi’s Vision of the Tree of Life", ref: "1 Nephi 8:10–21", volume: "bofm", book: "1-ne", chapter: 8, verses: "10-21" },
+      { title: "Nephi’s Vision of the Tree and Future of His People", ref: "1 Nephi 11:8–23", volume: "bofm", book: "1-ne", chapter: 11, verses: "8-23" },
+      { title: "Building the Ship", ref: "1 Nephi 17:7–16", volume: "bofm", book: "1-ne", chapter: 17, verses: "7-16" },
+      { title: "Journey to the Promised Land", ref: "1 Nephi 18:8–16", volume: "bofm", book: "1-ne", chapter: 18, verses: "8-16" },
+      { title: "Enos Prays for Forgiveness", ref: "Enos 1:2–12", volume: "bofm", book: "enos", chapter: 1, verses: "2-12" },
+      { title: "Conversion of Alma the Elder", ref: "Mosiah 18:7–16", volume: "bofm", book: "mosiah", chapter: 18, verses: "7-16" },
+      { title: "Deliverance of Alma’s People", ref: "Mosiah 24:10–17", volume: "bofm", book: "mosiah", chapter: 24, verses: "10-17" },
+      { title: "Alma the Younger Converted by an Angel", ref: "Mosiah 27:10–20", volume: "bofm", book: "mosiah", chapter: 27, verses: "10-20" },
+      { title: "Conversion of the Lamanites (Ammon and King Lamoni)", ref: "Alma 18:24–40", volume: "bofm", book: "alma", chapter: 18, verses: "24-40" },
+      { title: "Lamoni’s Father Converted", ref: "Alma 22:15–23", volume: "bofm", book: "alma", chapter: 22, verses: "15-23" },
+      { title: "Anti-Nephi-Lehies Bury Their Weapons", ref: "Alma 24:15–19", volume: "bofm", book: "alma", chapter: 24, verses: "15-19" },
+      { title: "Captain Moroni and the Title of Liberty", ref: "Alma 46:11–21", volume: "bofm", book: "alma", chapter: 46, verses: "11-21" },
+      { title: "Stripling Warriors", ref: "Alma 56:45–56", volume: "bofm", book: "alma", chapter: 56, verses: "45-56" },
+      { title: "Helaman’s Sons Nephi and Lehi in Prison", ref: "Helaman 5:21–34", volume: "bofm", book: "hel", chapter: 5, verses: "21-34" },
+      { title: "Prophecy of Samuel the Lamanite", ref: "Helaman 13:2–9", volume: "bofm", book: "hel", chapter: 13, verses: "2-9" },
+      { title: "Signs of Christ’s Birth", ref: "3 Nephi 1:8–15", volume: "bofm", book: "3-ne", chapter: 1, verses: "8-15" },
+      { title: "Destruction at Christ’s Death", ref: "3 Nephi 8:5–23", volume: "bofm", book: "3-ne", chapter: 8, verses: "5-23" },
+      { title: "Christ Appears to the Nephites", ref: "3 Nephi 11:8–17", volume: "bofm", book: "3-ne", chapter: 11, verses: "8-17" },
+      { title: "Jesus Blesses the Children", ref: "3 Nephi 17:11–24", volume: "bofm", book: "3-ne", chapter: 17, verses: "11-24" },
+      { title: "Jaredite Journey to the Promised Land", ref: "Ether 6:4–12", volume: "bofm", book: "ether", chapter: 6, verses: "4-12" },
+      { title: "Brother of Jared Sees the Lord’s Finger", ref: "Ether 3:6–13", volume: "bofm", book: "ether", chapter: 3, verses: "6-13" },
+      { title: "Moroni’s Promise", ref: "Moroni 10:3–5", volume: "bofm", book: "moro", chapter: 10, verses: "3-5" }
+    ];
+
+    // ====== URL Builder ======
+    function buildUrl(story) {
+      const base = "https://www.churchofjesuschrist.org/study/scriptures";
+      let url = `${base}/${story.volume}/${story.book}/${story.chapter}?lang=eng`;
+      if (story.verses) {
+        // Deep link to first verse if range is given
+        const firstVerse = story.verses.split(/[-,;]/)[0];
+        url += `&id=p${firstVerse}#p${firstVerse}`;
+      }
+      return url;
+    }
+
+    // ====== Helpers ======
+    function getDayOfYear() {
+      const now = new Date();
+      const start = new Date(now.getFullYear(), 0, 0);
+      const diff = now - start;
+      const oneDay = 1000 * 60 * 60 * 24;
+      return Math.floor(diff / oneDay);
+    }
+
+    function showTab(id, pushState = true) {
+      // Switch active classes
+      document.querySelectorAll("nav a").forEach(link => link.classList.remove("active"));
+      document.querySelectorAll(".tab").forEach(tab => tab.classList.remove("active"));
+      document.querySelector(`nav a[data-tab="${id}"]`).classList.add("active");
+      document.getElementById(id).classList.add("active");
+
+      // Update URL param
+      if (pushState) {
+        const url = new URL(window.location);
+        url.searchParams.set("tab", id);
+        window.history.replaceState({}, "", url);
+      }
+    }
+
+    // Handle clicks on nav links without reloading
+    document.querySelectorAll("nav a").forEach(link => {
+      link.addEventListener("click", e => {
+        e.preventDefault();
+        const id = link.getAttribute("data-tab");
+        showTab(id);
+      });
+    });
+
+    // On page load: check ?tab=...
+    const params = new URLSearchParams(window.location.search);
+    const initialTab = params.get("tab") || "daily";
+    showTab(initialTab, false);
+
+    // ====== Daily Story ======
+    const day = getDayOfYear();
+    const dailyIndex = day % stories.length;
+    const dailyStory = stories[dailyIndex];
+    document.getElementById("dailyStory").textContent = dailyStory.title;
+    document.getElementById("dailyRef").innerHTML =
+      `<a href="${buildUrl(dailyStory)}" target="_blank">${dailyStory.ref}</a>`;
+
+    // ====== Random Story ======
+    function pickRandom() {
+      const randIndex = Math.floor(Math.random() * stories.length);
+      const s = stories[randIndex];
+      document.getElementById("randomStory").textContent = s.title;
+      document.getElementById("randomRef").innerHTML =
+        `<a href="${buildUrl(s)}" target="_blank">${s.ref}</a>`;
+    }
+    pickRandom();
+
+    // ====== All Stories ======
+    const list = document.getElementById("allStories");
+
+    // Group stories by volume
+    const groups = {
+      bofm: { name: "Book of Mormon", stories: [] },
+      nt: { name: "New Testament", stories: [] },
+      ot: { name: "Old Testament", stories: [] }
+    };
+
+    stories.forEach(s => {
+      groups[s.volume].stories.push(s);
+    });
+
+    // Order we want: Book of Mormon, NT, OT
+    ["bofm", "nt", "ot"].forEach(vol => {
+      const group = groups[vol];
+      if (group.stories.length > 0) {
+        // Add heading
+        const heading = document.createElement("h3");
+        heading.textContent = group.name;
+        heading.style.marginTop = "1.5rem";
+        heading.style.marginBottom = "0.5rem";
+        heading.style.textAlign = "left";
+        heading.style.color = "var(--primary)";
+        heading.style.fontSize = "1.1rem";
+        heading.style.fontWeight = "600";
+        list.appendChild(heading);
+
+        // Add stories
+        group.stories.forEach(s => {
+          const li = document.createElement("li");
+          li.innerHTML = `<strong>${s.title}</strong><br><a href="${buildUrl(s)}" target="_blank">${s.ref}</a>`;
+          list.appendChild(li);
+        });
+      }
+    });
+  </script>
+</body>
+
+</html>
